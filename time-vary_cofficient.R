@@ -1,3 +1,9 @@
+cat( "\014" )
+# Clear plots
+if( dev.cur() > 1 ) dev.off()
+# Clear global workspace
+rm( list = ls( envir = globalenv() ), envir = globalenv() )
+
 # パラメタの設定
 # サンプルサイズ
 N <- 500
@@ -17,14 +23,14 @@ explanatory <- rnorm(n=N, mean=10, sd=10)
 # slopeのシミュレーション
 set.seed(12)
 slope <- cumsum(rnorm(n=N, mean=0, sd=coefErrorSD)) + 10
-plot(slope, main="時間によるslopeの変化", xlab="day", type="l")
+plot(slope, main="slope varying", xlab="day", type="l")
 
 # 各種シミュレーションデータの作成
 
 # interceptのシミュレーション
 set.seed(3)
 intercept <- cumsum(rnorm(n=N, mean=0, sd=processErrorSD))
-plot(intercept, main="時間によるinterceptの変化", xlab="day",type="l")
+plot(intercept, main="intercept varying", xlab="day",type="l")
 
 
 # 各種シミュレーションデータの作成
@@ -32,7 +38,7 @@ plot(intercept, main="時間によるinterceptの変化", xlab="day",type="l")
 # responseのシミュレーション
 set.seed(4)
 response <- intercept + explanatory*slope + rnorm(n=N, mean=0, sd=observationErrorSD)
-plot(response, main="responseのシミュレーション結果", xlab="day",type="l")
+plot(response, main="response simulation result", xlab="day",type="l")
 
 
 # パッケージの読み込み
@@ -58,6 +64,8 @@ fitDlmReg <- dlmMLE(
   method = "SANN"
 )
 
+print(sqrt(exp(fitDlmReg$par)))
+print(sd(intercept))#not equal ordinary sd --process sd--
 # モデルの推定
 # 推定された分散を使って、モデルを組みなおす
 modDlmReg <- buildDlmReg(fitDlmReg$par)
@@ -86,7 +94,7 @@ lines(estimatedLevel, col=4)
 lines(intercept + explanatory*slope, col=2)
 
 # 凡例
-legend("topleft", legend=c("スムージングの結果","正しい値"), lty=1, col=c(4,2))
+legend("topleft", legend=c("smoothing result","right value"), lty=1, col=c(4,2))
 
 # 図示
 #　推定された傾き
@@ -97,4 +105,4 @@ lines(dropFirst(smoothDlmReg$s)[,2], type="l", ylim=c(0, 15), col=4)
 lines(slope, col=1)
 
 # 凡例
-legend("topleft", legend=c("フィルタリングの結果","スムージングの結果","正しい値"), lty=1, col=c(2,4,1))
+legend("topleft", legend=c("filtered result","smoothing result","right value"), lty=1, col=c(2,4,1))
